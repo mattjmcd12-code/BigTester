@@ -252,8 +252,82 @@ button:disabled {
     background: var(--cell-hover);
 }
 
+/* ===== Player-fleet ship styling =====
+   Each ship cell renders a gradient "hull segment" via ::before, with bow/stern
+   cells tapered into a capsule silhouette. One cell per ship also gets a
+   small centered turret via ::after. All CSS-only. */
 .cell.ship {
-    background: var(--ship);
+    background: transparent;
+    position: relative;
+}
+
+.cell.ship::before {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    background: linear-gradient(180deg, #93c5fd 0%, #3b82f6 55%, #1e3a8a 100%);
+    border: 1px solid #0b1a3a;
+    border-radius: 2px;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        inset 0 -2px 2px rgba(0, 0, 0, 0.28);
+}
+
+/* Horizontal bow / stern taper */
+.cell.ship.ship-h.ship-bow::before {
+    border-top-left-radius: 70% 55%;
+    border-bottom-left-radius: 70% 55%;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: none;
+}
+.cell.ship.ship-h.ship-stern::before {
+    border-top-right-radius: 45% 55%;
+    border-bottom-right-radius: 45% 55%;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    border-left: none;
+}
+.cell.ship.ship-h.ship-mid::before {
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+}
+
+/* Vertical bow / stern taper */
+.cell.ship.ship-v.ship-bow::before {
+    border-top-left-radius: 55% 70%;
+    border-top-right-radius: 55% 70%;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+}
+.cell.ship.ship-v.ship-stern::before {
+    border-bottom-left-radius: 55% 45%;
+    border-bottom-right-radius: 55% 45%;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-top: none;
+}
+.cell.ship.ship-v.ship-mid::before {
+    border-radius: 0;
+    border-top: none;
+    border-bottom: none;
+}
+
+/* Deck feature: a small turret / bridge dome on one cell per ship. */
+.cell.ship.ship-deck::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 42%;
+    height: 42%;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #e5e7eb 0%, #9ca3af 60%, #4b5563 100%);
+    border: 1px solid #0b1a3a;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
 }
 
 .cell.ship-preview {
