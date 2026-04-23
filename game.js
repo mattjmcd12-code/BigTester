@@ -102,6 +102,15 @@
         return `${String.fromCharCode(65 + c)}${r + 1}`;
     }
 
+    function shipOrientation(ship) {
+        if (ship.cells.length < 2) return "H";
+        return ship.cells[0][0] === ship.cells[1][0] ? "H" : "V";
+    }
+
+    function shipCellIndex(ship, r, c) {
+        return ship.cells.findIndex(([rr, cc]) => rr === r && cc === c);
+    }
+
     function randomFleet(shipsGrid, fleet) {
         for (const def of SHIP_DEFS) {
             let placed = false;
@@ -165,7 +174,18 @@
                 } else if (shot === "miss") {
                     el.classList.add("miss");
                 } else if (shipIdx !== null) {
+                    const ship = playerFleet[shipIdx];
+                    const pos = shipCellIndex(ship, r, c);
+                    const orient = shipOrientation(ship);
                     el.classList.add("ship");
+                    el.classList.add(orient === "H" ? "ship-h" : "ship-v");
+                    if (pos === 0) el.classList.add("ship-bow");
+                    else if (pos === ship.size - 1) el.classList.add("ship-stern");
+                    else el.classList.add("ship-mid");
+                    // Place a single deck feature on one cell per ship.
+                    if (pos === Math.floor((ship.size - 1) / 2)) {
+                        el.classList.add("ship-deck");
+                    }
                 }
             }
         }
