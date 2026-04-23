@@ -28,6 +28,8 @@
     const aiBoardEl = document.getElementById("ai-board");
     const statusEl = document.getElementById("status");
     const turnEl = document.getElementById("turn-indicator");
+    const playerActionEl = document.getElementById("player-action");
+    const enemyActionEl = document.getElementById("enemy-action");
     const shipListEl = document.getElementById("ship-list");
     const rotateBtn = document.getElementById("rotate-btn");
     const randomBtn = document.getElementById("random-btn");
@@ -94,6 +96,10 @@
 
     function randomInt(n) {
         return Math.floor(Math.random() * n);
+    }
+
+    function cellLabel(r, c) {
+        return `${String.fromCharCode(65 + c)}${r + 1}`;
     }
 
     function randomFleet(shipsGrid, fleet) {
@@ -216,6 +222,24 @@
         if (variant === "lose") statusEl.classList.add("lose");
     }
 
+    // Per-side shot log: each side keeps its own line so a player's result is not
+    // overwritten by the AI's counter-turn.
+    function setActionLine(el, text, variant) {
+        el.textContent = text;
+        el.classList.remove("hit", "miss", "sunk");
+        if (variant) el.classList.add(variant);
+    }
+    function updatePlayerAction(text, variant) {
+        setActionLine(playerActionEl, text, variant);
+    }
+    function updateEnemyAction(text, variant) {
+        setActionLine(enemyActionEl, text, variant);
+    }
+    function clearActionLines() {
+        updatePlayerAction("");
+        updateEnemyAction("");
+    }
+
     function updateTurnIndicator() {
         if (phase === "setup") {
             turnEl.textContent = "";
@@ -329,6 +353,7 @@
         phase = "play";
         setupPanel.hidden = true;
         updateStatus("Battle begins — take your shot!");
+        clearActionLines();
         updateTurnIndicator();
         renderPlayerBoard();
         renderAiBoard();
@@ -344,13 +369,13 @@
             aiFleet[shipIdx].hits.add(`${r},${c}`);
             const ship = aiFleet[shipIdx];
             if (ship.hits.size === ship.size) {
-                updateStatus(`Direct hit — you sank the enemy ${ship.name}!`);
+                updatePlayerAction(`${cellLabel(r, c)} — direct hit, sank the ${ship.name}!`, "sunk");
             } else {
-                updateStatus("Hit!");
+                updatePlayerAction(`${cellLabel(r, c)} — Hit!`, "hit");
             }
         } else {
             aiShots[r][c] = "miss";
-            updateStatus("Miss.");
+            updatePlayerAction(`${cellLabel(r, c)} — Miss.`, "miss");
         }
         renderAiBoard();
 
@@ -461,20 +486,20 @@
             ship.hits.add(`${r},${c}`);
 
             if (ship.hits.size === ship.size) {
-                updateStatus(`Enemy sank your ${ship.name}!`, "lose");
+                updateEnemyAction(`${cellLabel(r, c)} — sank your ${ship.name}!`, "sunk");
                 // Reset targeting state — the current ship is done.
                 aiMode = "hunt";
                 aiHitStack = [];
                 aiTargetQueue = [];
             } else {
-                updateStatus("Enemy hit your ship.");
+                updateEnemyAction(`${cellLabel(r, c)} — Hit!`, "hit");
                 aiMode = "target";
                 aiHitStack.push([r, c]);
                 queueTargetsAroundHit(r, c);
             }
         } else {
             playerShots[r][c] = "miss";
-            updateStatus("Enemy missed.");
+            updateEnemyAction(`${cellLabel(r, c)} — Miss.`, "miss");
         }
         renderPlayerBoard();
 
@@ -524,6 +549,7 @@
         renderPlayerBoard();
         renderAiBoard();
         updateStatus("Place your ships to begin.");
+        clearActionLines();
         updateTurnIndicator();
     }
 
